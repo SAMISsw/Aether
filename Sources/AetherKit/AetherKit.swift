@@ -285,21 +285,22 @@ public extension AetherRigidBody {
 }
 struct AetherView: UIViewRepresentable {
     let frame: CGRect
-    @Binding var emitter: AetherParticleEmitter
-    @Binding var rigidBody: AetherRigidBody
+    var emitter: AetherParticleEmitter
+    var rigidBody: AetherRigidBody
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: frame)
         let emitterView = AetherEmitterView(frame: frame, emitter: emitter, rigidBody: rigidBody)
         view.addSubview(emitterView)
-        
         context.coordinator.emitterView = emitterView
-        
         return view
     }
+    
     func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.updateEmitter(emitter)
-        context.coordinator.updateRigidBody(rigidBody)
+        if let emitterView = context.coordinator.emitterView {
+            emitterView.updateEmitter(emitter)
+            emitterView.updateRigidBody(rigidBody)
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -308,22 +309,14 @@ struct AetherView: UIViewRepresentable {
     
     class Coordinator: NSObject {
         var emitterView: AetherEmitterView?
-        
-        func updateEmitter(_ emitter: AetherParticleEmitter) {
-            emitterView?.updateEmitter(emitter)
-        }
-        
-        func updateRigidBody(_ rigidBody: AetherRigidBody) {
-            emitterView?.updateRigidBody(rigidBody)
-        }
     }
 }
+
 class AetherEmitterView: UIView {
     private var emitter: AetherParticleEmitter
     private var rigidBody: AetherRigidBody
     private var lastUpdateTime: TimeInterval = 0
     
-
     init(frame: CGRect, emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
         self.emitter = emitter
         self.rigidBody = rigidBody
@@ -336,13 +329,11 @@ class AetherEmitterView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-
     func startAnimating() {
         let displayLink = CADisplayLink(target: self, selector: #selector(update))
         displayLink.add(to: .main, forMode: .default)
     }
     
-
     @objc private func update(_ displayLink: CADisplayLink) {
         let currentTime = displayLink.timestamp
         let deltaTime = CGFloat(currentTime - lastUpdateTime)
@@ -354,7 +345,6 @@ class AetherEmitterView: UIView {
         self.setNeedsDisplay()
     }
     
-
     override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         context?.clear(rect)
@@ -362,11 +352,11 @@ class AetherEmitterView: UIView {
         rigidBody.render(in: context!)
     }
     
-
     func updateEmitter(_ emitter: AetherParticleEmitter) {
         self.emitter = emitter
         self.setNeedsDisplay()
     }
+    
     func updateRigidBody(_ rigidBody: AetherRigidBody) {
         self.rigidBody = rigidBody
         self.setNeedsDisplay()
