@@ -1,5 +1,5 @@
 //
-// //
+//
 // Copyright 2024 by Samuel Campos de Andrade 
 // THE-PI
 // Donation PIX: 06253847333
@@ -283,66 +283,6 @@ public extension AetherRigidBody {
         self.applyForce(force)
     }
 }
-
-
-
-struct AetherView: UIViewRepresentable {
-    let frame: CGRect
-    let emitter: AetherParticleEmitter
-    let rigidBody: AetherRigidBody
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: frame)
-        let emitterView = AetherEmitterView(frame: frame, emitter: emitter, rigidBody: rigidBody)
-        view.addSubview(emitterView)
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-
-    }
-}
-
-class AetherEmitterView: UIView {
-    var emitter: AetherParticleEmitter
-    var rigidBody: AetherRigidBody
-    var lastUpdateTime: TimeInterval = 0
-    
-    init(frame: CGRect, emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
-        self.emitter = emitter
-        self.rigidBody = rigidBody
-        super.init(frame: frame)
-        self.backgroundColor = .clear
-        self.startAnimating()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func startAnimating() {
-        let displayLink = CADisplayLink(target: self, selector: #selector(update))
-        displayLink.add(to: .main, forMode: .default)
-    }
-    
-    @objc func update(_ displayLink: CADisplayLink) {
-        let currentTime = displayLink.timestamp
-        let deltaTime = CGFloat(currentTime - lastUpdateTime)
-        lastUpdateTime = currentTime
-        
-        emitter.update(deltaTime: deltaTime)
-        rigidBody.update(deltaTime: deltaTime)
-        
-        self.setNeedsDisplay()
-    }
-    
-    override func draw(_ rect: CGRect) {
-        let context = UIGraphicsGetCurrentContext()
-        context?.clear(rect)
-        emitter.render(in: context!)
-        rigidBody.render(in: context!)
-    }
-}
 struct AetherView: UIViewRepresentable {
     let frame: CGRect
     @Binding var emitter: AetherParticleEmitter
@@ -352,10 +292,11 @@ struct AetherView: UIViewRepresentable {
         let view = UIView(frame: frame)
         let emitterView = AetherEmitterView(frame: frame, emitter: emitter, rigidBody: rigidBody)
         view.addSubview(emitterView)
+        
         context.coordinator.emitterView = emitterView
-       return view
+        
+        return view
     }
-    
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.updateEmitter(emitter)
         context.coordinator.updateRigidBody(rigidBody)
@@ -375,5 +316,59 @@ struct AetherView: UIViewRepresentable {
         func updateRigidBody(_ rigidBody: AetherRigidBody) {
             emitterView?.updateRigidBody(rigidBody)
         }
+    }
+}
+class AetherEmitterView: UIView {
+    private var emitter: AetherParticleEmitter
+    private var rigidBody: AetherRigidBody
+    private var lastUpdateTime: TimeInterval = 0
+    
+
+    init(frame: CGRect, emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
+        self.emitter = emitter
+        self.rigidBody = rigidBody
+        super.init(frame: frame)
+        self.backgroundColor = .clear
+        self.startAnimating()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+
+    func startAnimating() {
+        let displayLink = CADisplayLink(target: self, selector: #selector(update))
+        displayLink.add(to: .main, forMode: .default)
+    }
+    
+
+    @objc private func update(_ displayLink: CADisplayLink) {
+        let currentTime = displayLink.timestamp
+        let deltaTime = CGFloat(currentTime - lastUpdateTime)
+        lastUpdateTime = currentTime
+        
+        emitter.update(deltaTime: deltaTime)
+        rigidBody.update(deltaTime: deltaTime)
+        
+        self.setNeedsDisplay()
+    }
+    
+
+    override func draw(_ rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(rect)
+        emitter.render(in: context!)
+        rigidBody.render(in: context!)
+    }
+    
+
+    func updateEmitter(_ emitter: AetherParticleEmitter) {
+        self.emitter = emitter
+        self.setNeedsDisplay()
+    }
+    func updateRigidBody(_ rigidBody: AetherRigidBody) {
+        self.rigidBody = rigidBody
+        self.setNeedsDisplay()
     }
 }
