@@ -284,34 +284,22 @@ public extension AetherRigidBody {
     }
 }
 struct AetherView: UIViewRepresentable {
-    let frame: CGRect
-    var emitter: AetherParticleEmitter
-    var rigidBody: AetherRigidBody
-    
+    @ObservedObject var state: AetherState
+
     func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: frame)
-        let emitterView = AetherEmitterView(frame: frame, emitter: emitter, rigidBody: rigidBody)
+        let view = UIView()
+        let emitterView = AetherEmitterView(frame: UIScreen.main.bounds, emitter: state.emitter, rigidBody: state.rigidBody)
         view.addSubview(emitterView)
-        context.coordinator.emitterView = emitterView
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        if let emitterView = context.coordinator.emitterView {
-            emitterView.updateEmitter(emitter)
-            emitterView.updateRigidBody(rigidBody)
+        if let emitterView = uiView.subviews.first as? AetherEmitterView {
+            emitterView.updateEmitter(state.emitter)
+            emitterView.updateRigidBody(state.rigidBody)
         }
     }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-    
-    class Coordinator: NSObject {
-        var emitterView: AetherEmitterView?
-    }
 }
-
 class AetherEmitterView: UIView {
     private var emitter: AetherParticleEmitter
     private var rigidBody: AetherRigidBody
@@ -393,5 +381,14 @@ struct AetherParticleUIView: UIViewRepresentable {
         func updateRigidBody(_ rigidBody: AetherRigidBody) {
             emitterView?.updateRigidBody(rigidBody)
         }
+    }
+}
+class AetherState: ObservableObject {
+    @Published var emitter: AetherParticleEmitter
+    @Published var rigidBody: AetherRigidBody
+    
+    init(emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
+        self.emitter = emitter
+        self.rigidBody = rigidBody
     }
 }
