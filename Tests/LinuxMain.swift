@@ -1,7 +1,7 @@
 import XCTest
 
-import MyLibraryTests
+import AetherKit
 
 var tests = [XCTestCaseEntry]()
-tests += MyLibraryTests.allTests()
+tests += AetherKit.allTests()
 XCTMain(tests)
