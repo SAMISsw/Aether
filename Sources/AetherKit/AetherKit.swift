@@ -1,12 +1,11 @@
 //
+// //
 // Copyright 2024 by Samuel Campos de Andrade 
 // THE-PI
 // Donation PIX: 06253847333
 import UIKit
 import CoreGraphics
 import SwiftUI
-
-
 
 public class AetherParticle {
     public var position: CGPoint
@@ -18,11 +17,11 @@ public class AetherParticle {
     public var angularVelocity: CGFloat
     public var animationType: AnimationType = .none
     public var animationProgress: CGFloat = 0
-
-    public enum AnimationType {
+    
+    public enum AnimationType: CaseIterable {
         case none, bounce, fade, rotate, scale, wobble, pulse, sway, shrink, grow, jiggle, wave, spin, drift, zoom, flicker, flash, bounceX, bounceY, float, expand, contract, shimmer, bob
     }
-
+    
     public init(position: CGPoint, velocity: CGPoint, lifetime: CGFloat, color: UIColor = .white, size: CGFloat = 5, rotation: CGFloat = 0, angularVelocity: CGFloat = 0) {
         self.position = position
         self.velocity = velocity
@@ -32,7 +31,7 @@ public class AetherParticle {
         self.rotation = rotation
         self.angularVelocity = angularVelocity
     }
-
+    
     public func update(deltaTime: CGFloat) {
         position.x += velocity.x * deltaTime
         position.y += velocity.y * deltaTime
@@ -40,7 +39,7 @@ public class AetherParticle {
         rotation += angularVelocity * deltaTime
         applyAnimation(deltaTime: deltaTime)
     }
-
+    
     private func applyAnimation(deltaTime: CGFloat) {
         switch animationType {
         case .bounce:
@@ -96,7 +95,7 @@ public class AetherParticle {
         }
         animationProgress += deltaTime
     }
-
+    
     public func isAlive() -> Bool {
         return lifetime > 0
     }
@@ -112,7 +111,7 @@ public class AetherParticleEmitter {
     public var particleSize: CGFloat
     public var angularVelocityRange: CGFloat
     public var rotation: CGFloat
-
+    
     public init(position: CGPoint, emissionRate: Int, particleLifetime: CGFloat, velocityRange: CGFloat, particleColor: UIColor = .white, particleSize: CGFloat = 5, angularVelocityRange: CGFloat = 0, rotation: CGFloat = 0) {
         self.position = position
         self.emissionRate = emissionRate
@@ -123,17 +122,17 @@ public class AetherParticleEmitter {
         self.angularVelocityRange = angularVelocityRange
         self.rotation = rotation
     }
-
+    
     public func emitParticles() {
         for _ in 0..<emissionRate {
             let velocity = CGPoint(x: CGFloat.random(in: -velocityRange...velocityRange), y: CGFloat.random(in: -velocityRange...velocityRange))
             let angularVelocity = CGFloat.random(in: -angularVelocityRange...angularVelocityRange)
             let particle = AetherParticle(position: position, velocity: velocity, lifetime: particleLifetime, color: particleColor, size: particleSize, rotation: rotation, angularVelocity: angularVelocity)
-            particle.animationType = AnimationType.allCases.randomElement() ?? .none
+            particle.animationType = AetherParticle.AnimationType.allCases.randomElement() ?? .none
             particles.append(particle)
         }
     }
-
+    
     public func update(deltaTime: CGFloat) {
         emitParticles()
         particles.removeAll { !$0.isAlive() }
@@ -141,7 +140,7 @@ public class AetherParticleEmitter {
             particle.update(deltaTime: deltaTime)
         }
     }
-
+    
     public func render(in context: CGContext) {
         for particle in particles {
             context.saveGState()
@@ -155,6 +154,9 @@ public class AetherParticleEmitter {
         }
     }
 }
+public enum AnimationType: CaseIterable {
+    case none, bounce, fade, rotate, scale, wobble, pulse, sway, shrink, grow, jiggle, wave, spin, drift, zoom, flicker, flash, bounceX, bounceY, float, expand, contract, shimmer, bob
+}
 
 public class AetherRigidBody {
     public var position: CGPoint
@@ -163,7 +165,7 @@ public class AetherRigidBody {
     public var friction: CGFloat
     public var acceleration: CGPoint
     public var forces: [CGPoint] = []
-
+    
     public init(position: CGPoint, velocity: CGPoint, mass: CGFloat, friction: CGFloat, acceleration: CGPoint = .zero) {
         self.position = position
         self.velocity = velocity
@@ -171,11 +173,11 @@ public class AetherRigidBody {
         self.friction = friction
         self.acceleration = acceleration
     }
-
+    
     public func applyForce(_ force: CGPoint) {
         forces.append(force)
     }
-
+    
     public func update(deltaTime: CGFloat) {
         var totalForce = CGPoint.zero
         for force in forces {
@@ -183,7 +185,7 @@ public class AetherRigidBody {
             totalForce.y += force.y
         }
         forces.removeAll()
-
+        
         let acceleration = CGPoint(x: totalForce.x / mass, y: totalForce.y / mass)
         velocity.x += acceleration.x * deltaTime
         velocity.y += acceleration.y * deltaTime
@@ -192,7 +194,7 @@ public class AetherRigidBody {
         position.x += velocity.x * deltaTime
         position.y += velocity.y * deltaTime
     }
-
+    
     public func render(in context: CGContext) {
         context.setFillColor(UIColor.blue.cgColor)
         context.addRect(CGRect(x: position.x, y: position.y, width: 20, height: 20))
@@ -207,14 +209,14 @@ public class AetherSpring {
     public var end: CGPoint
     public var stiffness: CGFloat
     public var damping: CGFloat
-
+    
     public init(start: CGPoint, end: CGPoint, stiffness: CGFloat, damping: CGFloat) {
         self.start = start
         self.end = end
         self.stiffness = stiffness
         self.damping = damping
     }
-
+    
     public func applySpringForces(to particle: AetherParticle) {
         let dx = end.x - particle.position.x
         let dy = end.y - particle.position.y
@@ -232,27 +234,27 @@ public extension AetherParticleEmitter {
     func setParticleColor(_ color: UIColor) {
         self.particleColor = color
     }
-
+    
     func setParticleSize(_ size: CGFloat) {
         self.particleSize = size
     }
-
+    
     func setEmissionRate(_ rate: Int) {
         self.emissionRate = rate
     }
-
+    
     func setVelocityRange(_ range: CGFloat) {
         self.velocityRange = range
     }
-
+    
     func setLifetime(_ lifetime: CGFloat) {
         self.particleLifetime = lifetime
     }
-
+    
     func setRotation(_ rotation: CGFloat) {
         self.rotation = rotation
     }
-
+    
     func setAngularVelocityRange(_ range: CGFloat) {
         self.angularVelocityRange = range
     }
@@ -264,19 +266,19 @@ public extension AetherRigidBody {
     func setFriction(_ friction: CGFloat) {
         self.friction = friction
     }
-
+    
     func setMass(_ mass: CGFloat) {
         self.mass = mass
     }
-
+    
     func setPosition(_ position: CGPoint) {
         self.position = position
     }
-
+    
     func setVelocity(_ velocity: CGPoint) {
         self.velocity = velocity
     }
-
+    
     func applyExternalForce(_ force: CGPoint) {
         self.applyForce(force)
     }
