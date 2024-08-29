@@ -7,6 +7,112 @@ import UIKit
 import CoreGraphics
 import SwiftUI
 
+public class AetherTextParticle {
+    public var position: CGPoint
+    public var velocity: CGPoint
+    public var lifetime: CGFloat
+    public var text: String
+    public var font: UIFont
+    public var color: UIColor
+    public var rotation: CGFloat
+    public var angularVelocity: CGFloat
+
+    public init(position: CGPoint, velocity: CGPoint, lifetime: CGFloat, text: String, font: UIFont = UIFont.systemFont(ofSize: 12), color: UIColor = .black, rotation: CGFloat = 0, angularVelocity: CGFloat = 0) {
+        self.position = position
+        self.velocity = velocity
+        self.lifetime = lifetime
+        self.text = text
+        self.font = font
+        self.color = color
+        self.rotation = rotation
+        self.angularVelocity = angularVelocity
+    }
+    
+    public func update(deltaTime: CGFloat) {
+        position.x += velocity.x * deltaTime
+        position.y += velocity.y * deltaTime
+        lifetime -= deltaTime
+        rotation += angularVelocity * deltaTime
+    }
+    
+    public func isAlive() -> Bool {
+        return lifetime > 0
+    }
+}
+struct AetherTextView: UIViewRepresentable {
+    class Coordinator: NSObject {
+        var emitterView: AetherTextEmitterView?
+        
+        func updateParticles(_ particles: [AetherTextParticle]) {
+            emitterView?.textParticles = particles
+            emitterView?.setNeedsDisplay()
+        }
+    }
+    
+    @State private var particles: [AetherTextParticle]
+    
+    func makeUIView(context: Context) -> AetherTextEmitterView {
+        let view = AetherTextEmitterView(frame: UIScreen.main.bounds)
+        context.coordinator.emitterView = view
+        view.startAnimating()
+        return view
+    }
+    
+    func updateUIView(_ uiView: AetherTextEmitterView, context: Context) {
+        context.coordinator.updateParticles(particles)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+}
+class AetherTextEmitterView: UIView {
+    private var textParticles: [AetherTextParticle] = []
+    private var lastUpdateTime: TimeInterval = 0
+    
+    var particles: [AetherTextParticle] = []
+    
+    func addTextParticle(_ particle: AetherTextParticle) {
+        textParticles.append(particle)
+    }
+
+    func startAnimating() {
+        let displayLink = CADisplayLink(target: self, selector: #selector(update))
+        displayLink.add(to: .main, forMode: .default)
+    }
+    
+    @objc private func update(_ displayLink: CADisplayLink) {
+        let currentTime = displayLink.timestamp
+        let deltaTime = CGFloat(currentTime - lastUpdateTime)
+        lastUpdateTime = currentTime
+        
+        textParticles.removeAll { !$0.isAlive() }
+        for particle in textParticles {
+            particle.update(deltaTime: deltaTime)
+        }
+        
+        self.setNeedsDisplay()
+    }
+    
+    override func draw(_ rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(rect)
+        
+        for particle in textParticles {
+            context?.saveGState()
+            context?.translateBy(x: particle.position.x, y: particle.position.y)
+            context?.rotate(by: particle.rotation)
+            let textRect = CGRect(x: -particle.font.pointSize / 2, y: -particle.font.pointSize / 2, width: particle.font.pointSize * CGFloat(particle.text.count), height: particle.font.pointSize)
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: particle.font,
+                .foregroundColor: particle.color
+            ]
+            let attributedText = NSAttributedString(string: particle.text, attributes: attributes)
+            attributedText.draw(in: textRect)
+            context?.restoreGState()
+        }
+    }
+}
 public class AetherParticle {
     public var position: CGPoint
     public var velocity: CGPoint
