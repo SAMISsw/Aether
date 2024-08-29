@@ -363,8 +363,8 @@ class AetherEmitterView: UIView {
     }
 }
 struct AetherParticleUIView: UIViewRepresentable {
-    @Binding var emitter: AetherParticleEmitter
-    @Binding var rigidBody: AetherRigidBody
+    var emitter: AetherParticleEmitter
+    var rigidBody: AetherRigidBody
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: UIScreen.main.bounds)
