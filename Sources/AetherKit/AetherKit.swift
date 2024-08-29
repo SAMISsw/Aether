@@ -283,9 +283,18 @@ public extension AetherRigidBody {
         self.applyForce(force)
     }
 }
+class AetherState: ObservableObject {
+    @Published var emitter: AetherParticleEmitter
+    @Published var rigidBody: AetherRigidBody
+    
+    init(emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
+        self.emitter = emitter
+        self.rigidBody = rigidBody
+    }
+}
 struct AetherView: UIViewRepresentable {
     @ObservedObject var state: AetherState
-
+    
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         let emitterView = AetherEmitterView(frame: UIScreen.main.bounds, emitter: state.emitter, rigidBody: state.rigidBody)
