@@ -41,29 +41,33 @@ public class AetherTextParticle {
 }
 @available(iOS 13.0, *)
 public struct AetherTextView: UIViewRepresentable {
-    @Binding var particles: [AetherTextParticle]
+    @Binding public var particles: [AetherTextParticle]
+
+    public init(particles: Binding<[AetherTextParticle]>) {
+        self._particles = particles
+    }
     
-   public class Coordinator: NSObject {
-       var emitterView: AetherTextEmitterView?
+    public class Coordinator: NSObject {
+        var emitterView: AetherTextEmitterView?
         
-       public func updateParticles(_ particles: [AetherTextParticle]) {
+        func updateParticles(_ particles: [AetherTextParticle]) {
             emitterView?.textParticles = particles
             emitterView?.setNeedsDisplay()
         }
     }
     
-  public  func makeUIView(context: Context) -> AetherTextEmitterView {
+    public func makeUIView(context: Context) -> AetherTextEmitterView {
         let view = AetherTextEmitterView(frame: UIScreen.main.bounds)
         context.coordinator.emitterView = view
         view.startAnimating()
         return view
     }
     
-  public  func updateUIView(_ uiView: AetherTextEmitterView, context: Context) {
+    public func updateUIView(_ uiView: AetherTextEmitterView, context: Context) {
         context.coordinator.updateParticles(particles)
     }
     
-   public func makeCoordinator() -> Coordinator {
+    public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 }
