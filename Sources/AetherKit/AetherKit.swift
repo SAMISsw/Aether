@@ -283,32 +283,6 @@ public extension AetherRigidBody {
         self.applyForce(force)
     }
 }
-class AetherState: ObservableObject {
-    @Published var emitter: AetherParticleEmitter
-    @Published var rigidBody: AetherRigidBody
-    
-    init(emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
-        self.emitter = emitter
-        self.rigidBody = rigidBody
-    }
-}
-struct AetherView: UIViewRepresentable {
-    @ObservedObject var state: AetherState
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        let emitterView = AetherEmitterView(frame: UIScreen.main.bounds, emitter: state.emitter, rigidBody: state.rigidBody)
-        view.addSubview(emitterView)
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        if let emitterView = uiView.subviews.first as? AetherEmitterView {
-            emitterView.updateEmitter(state.emitter)
-            emitterView.updateRigidBody(state.rigidBody)
-        }
-    }
-}
 class AetherEmitterView: UIView {
     private var emitter: AetherParticleEmitter
     private var rigidBody: AetherRigidBody
@@ -359,10 +333,10 @@ class AetherEmitterView: UIView {
         self.setNeedsDisplay()
     }
 }
-struct AetherParticleUIView: UIViewRepresentable {
+public struct AetherParticleUIView: UIViewRepresentable {
     @ObservedObject var viewModel: AetherViewModel
     
-    func makeUIView(context: Context) -> UIView {
+   public func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: UIScreen.main.bounds)
         let emitterView = AetherEmitterView(frame: UIScreen.main.bounds, emitter: viewModel.emitter, rigidBody: viewModel.rigidBody)
         view.addSubview(emitterView)
@@ -370,32 +344,32 @@ struct AetherParticleUIView: UIViewRepresentable {
         return view
     }
     
-    func updateUIView(_ uiView: UIView, context: Context) {
+   public func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.updateEmitter(viewModel.emitter)
         context.coordinator.updateRigidBody(viewModel.rigidBody)
     }
     
-    func makeCoordinator() -> Coordinator {
+   public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
     
-    class Coordinator: NSObject {
+   public class Coordinator: NSObject {
         var emitterView: AetherEmitterView?
         
-        func updateEmitter(_ emitter: AetherParticleEmitter) {
+       public func updateEmitter(_ emitter: AetherParticleEmitter) {
             emitterView?.updateEmitter(emitter)
         }
         
-        func updateRigidBody(_ rigidBody: AetherRigidBody) {
+        public func updateRigidBody(_ rigidBody: AetherRigidBody) {
             emitterView?.updateRigidBody(rigidBody)
         }
     }
 }
-class AetherViewModel: ObservableObject {
+public class AetherViewModel: ObservableObject {
     @Published var emitter: AetherParticleEmitter
     @Published var rigidBody: AetherRigidBody
     
-    init(emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
+  public  init(emitter: AetherParticleEmitter, rigidBody: AetherRigidBody) {
         self.emitter = emitter
         self.rigidBody = rigidBody
     }
