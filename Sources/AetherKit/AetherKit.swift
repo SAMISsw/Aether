@@ -39,44 +39,44 @@ public class AetherTextParticle {
         return lifetime > 0
     }
 }
-struct AetherTextView: UIViewRepresentable {
-    class Coordinator: NSObject {
-        var emitterView: AetherTextEmitterView?
+@available(iOS 13.0, *)
+public struct AetherTextView: UIViewRepresentable {
+  public  class Coordinator: NSObject {
+     public   var emitterView: AetherTextEmitterView?
         
-        func updateParticles(_ particles: [AetherTextParticle]) {
+     public   func updateParticles(_ particles: [AetherTextParticle]) {
             emitterView?.textParticles = particles
             emitterView?.setNeedsDisplay()
         }
     }
     
-    @State private var particles: [AetherTextParticle]
+    @Binding var particles: [AetherTextParticle]
     
-    func makeUIView(context: Context) -> AetherTextEmitterView {
+ public   func makeUIView(context: Context) -> AetherTextEmitterView {
         let view = AetherTextEmitterView(frame: UIScreen.main.bounds)
         context.coordinator.emitterView = view
         view.startAnimating()
         return view
     }
     
-    func updateUIView(_ uiView: AetherTextEmitterView, context: Context) {
+  public  func updateUIView(_ uiView: AetherTextEmitterView, context: Context) {
         context.coordinator.updateParticles(particles)
     }
     
-    func makeCoordinator() -> Coordinator {
+   public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 }
-class AetherTextEmitterView: UIView {
-    private var textParticles: [AetherTextParticle] = []
+@available(iOS 13.0, *)
+public class AetherTextEmitterView: UIView {
+    public var textParticles: [AetherTextParticle] = []
     private var lastUpdateTime: TimeInterval = 0
     
-    var particles: [AetherTextParticle] = []
-    
-    func addTextParticle(_ particle: AetherTextParticle) {
+    public func addTextParticle(_ particle: AetherTextParticle) {
         textParticles.append(particle)
     }
 
-    func startAnimating() {
+    public func startAnimating() {
         let displayLink = CADisplayLink(target: self, selector: #selector(update))
         displayLink.add(to: .main, forMode: .default)
     }
@@ -94,7 +94,7 @@ class AetherTextEmitterView: UIView {
         self.setNeedsDisplay()
     }
     
-    override func draw(_ rect: CGRect) {
+    override public func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         context?.clear(rect)
         
@@ -113,6 +113,7 @@ class AetherTextEmitterView: UIView {
         }
     }
 }
+
 public class AetherParticle {
     public var position: CGPoint
     public var velocity: CGPoint
