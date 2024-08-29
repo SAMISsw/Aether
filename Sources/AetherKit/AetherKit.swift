@@ -362,3 +362,36 @@ class AetherEmitterView: UIView {
         self.setNeedsDisplay()
     }
 }
+struct AetherParticleUIView: UIViewRepresentable {
+    @Binding var emitter: AetherParticleEmitter
+    @Binding var rigidBody: AetherRigidBody
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: UIScreen.main.bounds)
+        let emitterView = AetherEmitterView(frame: UIScreen.main.bounds, emitter: emitter, rigidBody: rigidBody)
+        view.addSubview(emitterView)
+        context.coordinator.emitterView = emitterView
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.updateEmitter(emitter)
+        context.coordinator.updateRigidBody(rigidBody)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator: NSObject {
+        var emitterView: AetherEmitterView?
+        
+        func updateEmitter(_ emitter: AetherParticleEmitter) {
+            emitterView?.updateEmitter(emitter)
+        }
+        
+        func updateRigidBody(_ rigidBody: AetherRigidBody) {
+            emitterView?.updateRigidBody(rigidBody)
+        }
+    }
+}
