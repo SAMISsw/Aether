@@ -333,6 +333,7 @@ class AetherEmitterView: UIView {
         self.setNeedsDisplay()
     }
 }
+@available(iOS 13.0, *)
 public struct AetherParticleUIView: UIViewRepresentable {
     @ObservedObject var viewModel: AetherViewModel
     
@@ -365,6 +366,7 @@ public struct AetherParticleUIView: UIViewRepresentable {
         }
     }
 }
+@available(iOS 13.0, *)
 public class AetherViewModel: ObservableObject {
     @Published var emitter: AetherParticleEmitter
     @Published var rigidBody: AetherRigidBody
